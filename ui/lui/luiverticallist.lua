@@ -1,5 +1,5 @@
 LUI.UIVerticalList = {}
-LUI.UIVerticalList.addSpacer = function ( self, units, priority )
+LUI.UIVerticalList.AddSpacer = function ( self, units, priority )
 	local spacer = LUI.UIElement.new( {
 		leftAnchor = true,
 		rightAnchor = true,
@@ -26,18 +26,18 @@ LUI.UIVerticalList.new = function (defaultAnimationState)
 	element.selectElementIndex = LUI.UIVerticalList.SelectElementIndex
 	element.addNavigationFailSound = LUI.UIVerticalList.AddNavigationFailSound
 	element.addNavigationFocusSound = LUI.UIVerticalList.AddNavigationFocusSound
-	element:registerEventHandler("gain_focus", LUI.UIVerticalList.gainFocus)
-	element:registerEventHandler("gain_focus_skip_disabled", LUI.UIVerticalList.gainFocusSkipDisabled)
+	element:registerEventHandler( "gain_focus", LUI.UIVerticalList.gainFocus )
+	element:registerEventHandler( "gain_focus_skip_disabled", LUI.UIVerticalList.gainFocusSkipDisabled )
 	return element
 end
 
-LUI.UIVerticalList.addElement = function ( self, newChildElement )
+LUI.UIVerticalList.AddElement = function ( self, newChildElement )
 	LUI.UIElement.addElement( self, newChildElement )
 	self:setLayoutCached( false )
 	LUI.UIVerticalList.UpdateNavigation( self )
 end
 
-LUI.UIVerticalList.removeElement = function ( self, childElementToRemove )
+LUI.UIVerticalList.RemoveElement = function ( self, childElementToRemove )
 	LUI.UIElement.removeElement( self, childElementToRemove )
 	self:setLayoutCached( false )
 	LUI.UIVerticalList.UpdateNavigation( self )
@@ -50,13 +50,13 @@ LUI.UIVerticalList.AddElementToTop = function (self, newChildElement)
 		self:setLayoutCached(false)
 		LUI.UIVerticalList.UpdateNavigation(self)
 	else
-		LUI.UIVerticalList.AddElement(self, newChildElement)
-		self:setLayoutCached(false)
-		LUI.UIVerticalList.UpdateNavigation(self)
+		LUI.UIVerticalList.addElement(self, newChildElement)
+		self:setLayoutCached( false )
+		LUI.UIVerticalList.UpdateNavigation( self )
 	end
 end
 
-LUI.UIVerticalList.selectElementIndex = function ( self, index )
+LUI.UIVerticalList.SelectElementIndex = function ( self, index )
 	local childElement = self:getFirstChild()
 	local count = 0
 	while childElement ~= nil do
@@ -110,9 +110,7 @@ LUI.UIVerticalList.UpdateNavigation = function ( self, event )
 	if lastFocusable ~= nil and not self.disableWrapping then
 		if self.navigation ~= nil and self.navigation.down ~= nil then
 			lastFocusable.navigation.down = self.navigation.down
-			if type( self.navigation.down ) == "userdata" and self.navigation.down.m_focusable == true then
-				self.navigation.down.navigation.up = lastFocusable
-			end
+			self.navigation.down.navigation.up = lastFocusable
 		elseif lastFocusable ~= firstFocusable then
 			lastFocusable.navigation.down = firstFocusable
 			firstFocusable.navigation.up = lastFocusable
@@ -122,9 +120,7 @@ LUI.UIVerticalList.UpdateNavigation = function ( self, event )
 		end
 		if self.navigation ~= nil and self.navigation.up ~= nil then
 			firstFocusable.navigation.up = self.navigation.up
-			if type( self.navigation.up ) == "userdata" and self.navigation.up.m_focusable == true then
-				self.navigation.up.navigation.down = firstFocusable
-			end
+			self.navigation.up.navigation.down = firstFocusable
 		end
 	elseif lastFocusable ~= nil and self.disableWrapping and self.navigationFailSound then
 		firstFocusable.navigationSounds = {}
@@ -184,4 +180,3 @@ LUI.UIVerticalList.addNavigationFailSound = function ( self, sound )
 	self.navigationFailSound = sound
 	LUI.UIVerticalList.UpdateNavigation( self )
 end
-

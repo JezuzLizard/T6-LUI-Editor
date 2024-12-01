@@ -69,6 +69,7 @@ LUI.startswith = function (StringToCheck, StringStart)
 end
 
 require("LUI.LUIElement")
+require("LUI.LUIDebug")
 require("LUI.LUIElementAllocator")
 require("LUI.LUIRoot")
 require("LUI.LUITimer")
