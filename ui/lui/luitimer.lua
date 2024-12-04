@@ -46,9 +46,9 @@ LUI.UITimer.Tick = function (self, event)
 	else
 		element = self:getParent()
 	end
-	local f3_local1 = self.timerEvent
-	f3_local1.timeElapsed = self.interval + event.lateness
-	element:processEvent(f3_local1)
+	local timerEvent = self.timerEvent
+	timerEvent.timeElapsed = self.interval + event.lateness
+	element:processEvent(timerEvent)
 	if self.disposable then
 		self:close()
 	else

@@ -382,19 +382,10 @@ LUI.UIElement.loseFocus = function (self, Event)
 	self:dispatchEventToChildren(Event)
 end
 
-LUI.UIElement.EVENT_PAUSE_STATE = false
-LUI.UIElement.SetEventPauseState = function(state)
-	LUI.UIElement.EVENT_PAUSE_STATE = state
-end
-LUI.UIElement.GetEventPauseState = function()
-	return LUI.UIElement.EVENT_PAUSE_STATE
-end
+LUI.UIElement.EVENT_PAUSE_STATE = "false"
 
 LUI.UIElement.processEvent = function (self, Event)
-	if Event.name == "pause_events" and Event.data[1] ~= nil then
-		LUI.UIElement.SetEventPauseState(Event.data[1])
-	end
-	if LUI.UIElement.GetEventPauseState() then
+	if Event.name ~= "unpause_events" and LUI.UIElement.EVENT_PAUSE_STATE == "true" then
 		return
 	end
 	local eventHandler = self.m_eventHandlers[Event.name]
@@ -868,21 +859,23 @@ LUI.UIElement.setClass = function ( self, class )
 	end
 end
 
-LUI.UIElement:registerEventHandler("complete_animation", LUI.UIElement.CompleteAnimationEvent)
-LUI.UIElement:registerEventHandler("mousemove", LUI.UIElement.MouseMoveEvent)
-LUI.UIElement:registerEventHandler("mousedown", LUI.UIElement.MouseButtonEvent)
-LUI.UIElement:registerEventHandler("mouseup", LUI.UIElement.MouseButtonEvent)
-LUI.UIElement:registerEventHandler("mouseclear", LUI.UIElement.MouseClear)
-LUI.UIElement:registerEventHandler("gamepad_button", LUI.UIElement.GamepadButton)
-LUI.UIElement:registerEventHandler("gain_focus", LUI.UIElement.gainFocus)
-LUI.UIElement:registerEventHandler("lose_focus", LUI.UIElement.loseFocus)
-LUI.UIElement:registerEventHandler("restore_focus", LUI.UIElement.restoreFocus)
-LUI.UIElement:registerEventHandler("close", LUI.UIElement.close)
-LUI.UIElement:registerEventHandler("animate", LUI.UIElement.animate)
-LUI.UIElement:registerEventHandler("viewport_animation", LUI.UIElement.ViewportAnimation)
-LUI.UIElement:registerEventHandler("touchpad_move", LUI.UIElement.MouseMoveEvent)
-LUI.UIElement:registerEventHandler("touchpad_down", LUI.UIElement.MouseButtonEvent)
-LUI.UIElement:registerEventHandler("touchpad_up", LUI.UIElement.MouseButtonEvent)
+LUI.UIElement.m_eventHandlers = {
+	complete_animation = LUI.UIElement.CompleteAnimationEvent,
+	mousemove = LUI.UIElement.MouseMoveEvent,
+	mousedown = LUI.UIElement.MouseButtonEvent,
+	mouseup = LUI.UIElement.MouseButtonEvent,
+	mouseclear = LUI.UIElement.MouseClear,
+	gamepad_button = LUI.UIElement.GamepadButton,
+	gain_focus = LUI.UIElement.gainFocus,
+	lose_focus = LUI.UIElement.loseFocus,
+	restore_focus = LUI.UIElement.restoreFocus,
+	close = LUI.UIElement.close,
+	animate = LUI.UIElement.animate,
+	viewport_animation = LUI.UIElement.ViewportAnimation,
+	touchpad_move = LUI.UIElement.MouseMoveEvent,
+	touchpad_down = LUI.UIElement.MouseButtonEvent,
+	touchpad_up = LUI.UIElement.MouseButtonEvent
+}
 
 LUI.UIElement.new = function (ElementForAnimState)
 	local UIElement = ConstructLUIElement()
