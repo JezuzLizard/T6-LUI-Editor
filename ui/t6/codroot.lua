@@ -1,29 +1,6 @@
 LUI.CoDRoot = {}
 
-LUI.CoDRoot.EVENT_PAUSE_STATE = "false"
-local SetEventPauseState = function(state)
-	LUI.UIElement.EVENT_PAUSE_STATE = state
-	LUI.CoDRoot.EVENT_PAUSE_STATE = state
-end
-local GetEventPauseState = function()
-	return LUI.CoDRoot.EVENT_PAUSE_STATE
-end
-local IsPaused = function()
-	return LUI.CoDRoot.EVENT_PAUSE_STATE == "true"
-end
-
-LUI.CoDRoot.PriorityEvents = {}
-LUI.CoDRoot.PriorityEvents["unpause_events"] = 0
-LUI.CoDRoot.PriorityEvents["pause_events"] = 1
-
-local IsPriorityEvent = function(event)
-	return LUI.CoDRoot.PriorityEvents[event.name] ~= nil
-end
-
 local AddEventToQueue = function(menu, event)
-	if IsPaused() then
-		return
-	end
 	local eventQueue = menu.eventQueue
 	table.insert(eventQueue, event)
 	local queueSize = #eventQueue
@@ -33,9 +10,11 @@ local AddEventToQueue = function(menu, event)
 end
 
 LUI.CoDRoot.ProcessEvent = function (self, event)
-	if event.immediate == true or IsPriorityEvent(event) then
+	--print(self.id)
+	--print(event.name)
+	if event.immediate == true or editor_api.f_editor_active() and (event.name == editor_api.TICKER_EVENT or self.id == "UIEditor" or self.id == "UIEditorTicker") then
 		LUI.CoDRoot.ProcessEventNow(self, event)
-	else
+	elseif not editor_api.f_editor_active() then
 		AddEventToQueue(self, event)
 	end
 end
@@ -54,7 +33,7 @@ LUI.CoDRoot.ProcessEvents = function (self, event)
 		eventsToProcess = 1
 	end
 
-	if GetEventPauseState() == "true" then
+	if editor_api.f_editor_active() then
 		print("PAUSED\n")
 		return
 	end
@@ -70,15 +49,11 @@ LUI.CoDRoot.ProcessEvents = function (self, event)
 end
 
 LUI.CoDRoot.ProcessEventNow = function (self, event)
-	if event.name == "pause_events" then
-		SetEventPauseState("true")
-		print("hello: " .. LUI.CoDRoot.EVENT_PAUSE_STATE)
-	elseif event.name == "unpause_events" then
-		SetEventPauseState("false")
-		print("hello: " .. LUI.CoDRoot.EVENT_PAUSE_STATE)
-	end
 	if event.name ~= "process_events" then
 		Engine.EventProcessed()
+	end
+	if editor_api.f_editor_active() and (self.id ~= "UIEditor" or self.id ~= "UIEditorTicker") then
+		return nil
 	end
 	self:propagateEvent(event)
 	Engine.PIXBeginEvent(event.name)
@@ -107,15 +82,38 @@ LUI.CoDRoot.new = function (name)
 	root.numEvents = 0
 	root:registerEventHandler("process_events", LUI.CoDRoot.ProcessEvents)
 	root:registerEventHandler("close_all", LUI.CoDRoot.CloseAll)
+
 	if name == "UIRootDrc" then
 		root.propagateEvent = LUI.CoDRoot.DontPropagateEvent
 	else
 		root.propagateEvent = LUI.CoDRoot.PropagateEventToPrimaryRoot
 	end
+
 	root.processEvent = LUI.CoDRoot.ProcessEvent
 	if LUI.primaryRoot == nil then
 		LUI.primaryRoot = root
 	end
+
+	root.uieditor = LUI.UIElement.new({
+		left = 0,
+		top = 0,
+		right = 0,
+		bottom = 0,
+		leftAnchor = false,
+		topAnchor = false,
+		rightAnchor = false,
+		bottomAnchor = false
+	})
+	root.uieditor.id = "UIEditor"
+	root.uieditor.name = "UIEditor_" .. name
+	root.uieditor.ticker = LUI.UITimer.new(1000, "uieditor_tick", false, root.uieditor)
+	root.uieditor.ticker.id = "UIEditorTicker"
+	root.uieditor.ticker.name = "UIEditorTicker_" .. name
+	root.uieditor:registerEventHandler("uieditor_tick", editor_tools.MAIN)
+	root.uieditor:registerEventHandler("mousemove", editor_api.cb_mousemove_event)
+	root.uieditor:addElement(root.uieditor.ticker)
+	root:addElement(root.uieditor)
+
 	return root
 end
 

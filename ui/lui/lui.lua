@@ -33,6 +33,10 @@ function InheritFrom(UIClass)
 	setmetatable(NewUIElement.m_eventHandlers, {
 		__index = UIClass.m_eventHandlers
 	})
+	NewUIElement.m_animationStates = {}
+	setmetatable(NewUIElement.m_animationStates, {
+		__index = UIClass.m_animationStates
+	})
 	return NewUIElement
 end
 
@@ -54,19 +58,21 @@ LUI.ConcatenateToTable = function (TableToAddTo, TableToAddFrom)
 	end
 end
 
-LUI.clamp = function (Value1, Value2, Value3)
-	if Value1 <= Value2 then
-		return Value2
-	elseif Value3 <= Value1 then
-		return Value3
+LUI.clamp = function (value, min, max)
+	if value <= min then
+		return min
+	elseif max <= value then
+		return max
 	else
-		return Value1
+		return value
 	end
 end
 
 LUI.startswith = function (StringToCheck, StringStart)
 	return string.sub(StringToCheck, 1, string.len(StringStart)) == StringStart
 end
+
+require("lui.uieditor.editor")
 
 require("LUI.LUIElement")
 require("LUI.LUIDebug")

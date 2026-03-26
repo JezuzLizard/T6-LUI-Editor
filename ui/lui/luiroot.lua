@@ -29,6 +29,7 @@ local LUI_UIRoot_AddMenu = function ( self, event )
 	if menuCreationFunction then
 		local newMenu = menuCreationFunction( event.controller )
 		self:addElement( newMenu )
+		editor_api.f_callbacks_menu_created(newMenu, event)
 		newMenu:processEvent( {
 			name = "menu_opened",
 			controller = event.controller

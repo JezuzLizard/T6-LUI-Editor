@@ -1,0 +1,1 @@
+-- Investigate the difficulty in implementing regenerating LUI.CreateMenu functions with modified registeredAnimState calls

@@ -382,10 +382,8 @@ LUI.UIElement.loseFocus = function (self, Event)
 	self:dispatchEventToChildren(Event)
 end
 
-LUI.UIElement.EVENT_PAUSE_STATE = "false"
-
 LUI.UIElement.processEvent = function (self, Event)
-	if Event.name ~= "unpause_events" and LUI.UIElement.EVENT_PAUSE_STATE == "true" then
+	if editor_api.f_editor_active() and Event.name ~= editor_api.TICKER_EVENT then
 		return
 	end
 	local eventHandler = self.m_eventHandlers[Event.name]
@@ -459,6 +457,9 @@ LUI.UIElement.registerChildEventHandler = function (self, EventName)
 end
 
 LUI.UIElement.registerEventHandler = function (self, EventName, EventHandler)
+	if not editor_api.f_callbacks_element_event_registered(self, EventName, EventHandler) then
+		return
+	end
 	self.m_eventHandlers[EventName] = EventHandler
 end
 
@@ -877,17 +878,18 @@ LUI.UIElement.m_eventHandlers = {
 	touchpad_up = LUI.UIElement.MouseButtonEvent
 }
 
-LUI.UIElement.new = function (ElementForAnimState)
-	local UIElement = ConstructLUIElement()
-	LUI.UIElement.setClass(UIElement, LUI.UIElement)
-	UIElement:setLayoutCached(false)
-	if not ElementForAnimState then
-		UIElement:registerAnimationState("default", LUI.UIElement.m_defaultAnimationState)
+LUI.UIElement.new = function (animstate)
+	local element = ConstructLUIElement()
+	LUI.UIElement.setClass(element, LUI.UIElement)
+	element:setLayoutCached(false)
+	if not animstate then
+		element:registerAnimationState("default", LUI.UIElement.m_defaultAnimationState)
 	else
-		UIElement:registerAnimationState("default", ElementForAnimState)
+		element:registerAnimationState("default", animstate)
 	end
-	UIElement:animateToState("default")
-	return UIElement
+	element:animateToState("default")
+	editor_api.f_callbacks_element_construction(element, animstate)
+	return element
 end
 
 LUI.UIElement.ContainerState = {
